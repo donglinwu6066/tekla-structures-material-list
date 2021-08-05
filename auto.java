@@ -54,30 +54,48 @@ public class auto {
         // 2003 = xls; 2007 = xlsx;
         List<String> dataList = new ArrayList<>();
         // new file
-        String path = ".\\out-auto\\" + fileList.get(0) + ".xls";
+        String path;
         Workbook wb = null;
-        String extString = path.substring(path.lastIndexOf("."));
         InputStream is;
-        try {
-            is = new FileInputStream(".\\in\\" + fileList.get(0) + ".xls");
-            System.out.println("Reading template \n.\\in\\" + fileList.get(0) + ".xls\n");
-            if (".xls".equals(extString)) {
+        // try {
+        try{
+            path = ".\\out-auto\\" + fileList.get(0) + ".xlsx";
+            is = new FileInputStream(".\\in\\" + fileList.get(0) + ".xlsx");
+            System.out.println("Reading template \n.\\in\\" + fileList.get(0) + ".xlsx\n");
+            wb = new XSSFWorkbook(is);
+            
+        }
+        catch(IOException e){
+            try{
+                path = ".\\out-auto\\" + fileList.get(0) + ".xls";
+                is = new FileInputStream(".\\in\\" + fileList.get(0) + ".xls");
+                System.out.println("Reading template \n.\\in\\" + fileList.get(0) + ".xls\n");
                 wb = new HSSFWorkbook(is);
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook(is);
-            }
-        } catch (IOException e) {
-            System.out.println("Fail to read files");
-            e.printStackTrace();
-            if (".xls".equals(extString)) {
-                wb = new HSSFWorkbook();
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook();
-            } else {
+            }catch(IOException e2){
+                System.out.println("Fail to read files");
+                e2.printStackTrace();
                 System.out.println("Cannot find .xls or .xlsx");
                 return;
             }
         }
+            
+            // if (".xls".equals(extString)) {
+            //     wb = new HSSFWorkbook(is);
+            // } else if (".xlsx".equals(extString)) {
+            //     wb = new XSSFWorkbook(is);
+            // }
+        // } catch (IOException e) {
+        //     System.out.println("Fail to read files");
+        //     e.printStackTrace();
+        //     if (".xls".equals(extString)) {
+        //         wb = new HSSFWorkbook();
+        //     } else if (".xlsx".equals(extString)) {
+        //         wb = new XSSFWorkbook();
+        //     } else {
+        //         System.out.println("Cannot find .xls or .xlsx");
+        //         return;
+        //     }
+        // }
 
         // Excel
         // Sheet sheet = wb.createSheet();
@@ -128,6 +146,7 @@ public class auto {
                             cell = row.createCell(c);
                         }
                         cell.setCellValue(Integer.valueOf(tokens[4].substring(0, tokens[4].lastIndexOf("."))));
+                        
                     }
                     // ------------
                 } else if ("(".equals(dataList.get(count).substring(0, 1))) {
@@ -139,7 +158,10 @@ public class auto {
                             cell = row.createCell(c);
                         }
                         cell.setCellValue(tokens[0].substring(1));
+                        wb.getCreationHelper().createFormulaEvaluator().evaluateFormulaCell(sheet.getRow(r + i).getCell(c+1));
+                        wb.getCreationHelper().createFormulaEvaluator().evaluateFormulaCell(sheet.getRow(r + i).getCell(0));
                     }
+                    
                     if (((count + 1) == dataList.size()) || "Stock".equals(dataList.get(count + 1).substring(0, 5))) {
                         break;
                     }

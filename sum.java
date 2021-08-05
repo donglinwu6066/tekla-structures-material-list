@@ -46,31 +46,50 @@ public class sum {
         // 2003 = xls; 2007 = xlsx;
         List<String> dataList = new ArrayList<>();
         // new file
-        String path = ".\\out-sum\\" + file + "Sum.xls";
+        String path;
         Workbook wb = null;
-        String extString = path.substring(path.lastIndexOf("."));
         InputStream is;
-        try {
-            is = new FileInputStream(".\\out-auto\\" + file + ".xls");
-            System.out.println("Reading template \n.\\out-auto\\" + file + ".xls\n");
-            if (".xls".equals(extString)) {
+        try{
+            path = ".\\out-sum\\" + file + "Sum.xlsx";
+            is = new FileInputStream(".\\out-auto\\" + file + ".xlsx");
+            System.out.println("Reading template \n.\\out-auto\\" + file + ".xlsx\n");
+            wb = new XSSFWorkbook(is);
+            
+        }
+        catch(IOException e){
+            try{
+                path = ".\\out-sum\\" + file + "Sum.xls";
+                is = new FileInputStream(".\\out-auto\\" + file + ".xls");
+                System.out.println("Reading template \n.\\out-auto\\" + file + ".xls\n");
                 wb = new HSSFWorkbook(is);
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook(is);
-            }
-        } catch (IOException e) {
-            System.out.println("\nCannot find .\\out-auto\\" + file + ".xls\n");
-            // print the work file
-            e.printStackTrace();
-            if (".xls".equals(extString)) {
-                wb = new HSSFWorkbook();
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook();
-            } else {
+            }catch(IOException e2){
+                System.out.println("Fail to read files");
+                e2.printStackTrace();
                 System.out.println("Cannot find .xls or .xlsx");
                 return;
             }
         }
+        // try {
+        //     is = new FileInputStream(".\\out-auto\\" + file + ".xls");
+        //     System.out.println("Reading template \n.\\in\\" + file + ".xls\n");
+        //     if (".xls".equals(extString)) {
+        //         wb = new HSSFWorkbook(is);
+        //     } else if (".xlsx".equals(extString)) {
+        //         wb = new XSSFWorkbook(is);
+        //     }
+        // } catch (IOException e) {
+        //     System.out.println("\nCannot find .\\out\\" + file + ".xls\n");
+        //     // print the work file
+        //     e.printStackTrace();
+        //     if (".xls".equals(extString)) {
+        //         wb = new HSSFWorkbook();
+        //     } else if (".xlsx".equals(extString)) {
+        //         wb = new XSSFWorkbook();
+        //     } else {
+        //         System.out.println("Cannot find .xls or .xlsx");
+        //         return;
+        //     }
+        // }
 
         // Excel
         // Sheet sheet = wb.createSheet();

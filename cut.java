@@ -17,9 +17,8 @@ import java.nio.file.Paths;
 
 // 2003 = HSSFWorkbook, 2007 = XSSFWorkbook;
 import org.apache.poi.hssf.usermodel.*;
-// import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;  
 import org.apache.poi.ss.usermodel.BorderStyle;  
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;  
@@ -28,11 +27,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 
 public class cut {
@@ -42,11 +43,16 @@ public class cut {
     static Hashtable<String, W> wtable = new Hashtable<String, W>();
     static Hashtable<String, WR> wrtable = new Hashtable<String, WR>();
     static Hashtable<String, FR> frtable = new Hashtable<String, FR>();
-    static HSSFCellStyle cellStyle;
-    static HSSFCellStyle cellStyle_red;
-    static HSSFCellStyle cellStyle_blue_border;
-    static HSSFCellStyle cellStyle_border;
-    static HSSFCellStyle cellStyle_red_border;
+    // static HSSFCellStyle cellStyle;
+    // static HSSFCellStyle cellStyle_red;
+    // static HSSFCellStyle cellStyle_blue_border;
+    // static HSSFCellStyle cellStyle_border;
+    // static HSSFCellStyle cellStyle_red_border;
+    static CellStyle cellStyle;
+    static CellStyle cellStyle_red;
+    static CellStyle cellStyle_blue_border;
+    static CellStyle cellStyle_border;
+    static CellStyle cellStyle_red_border;
     public static void main(String argv[]) {
         String projectName;
         if(argv.length>0){
@@ -73,52 +79,73 @@ public class cut {
         // 2003 = xls; 2007 = xlsx;
         List<String> dataList = new ArrayList<>();
         // new file
-        String path = ".\\out-cut\\" + file + "Cut.xls";
+        String path;
         Workbook wb = null;
-        String extString = path.substring(path.lastIndexOf("."));
         InputStream is;
-        try {
-            is = new FileInputStream(".\\out-sum\\" + file + "Sum.xls");
-            System.out.println("Reading template \n.\\out-sum\\" + file + "Sum.xls\n");
-            if (".xls".equals(extString)) {
+        try{
+            path = ".\\out-cut\\" + file + "Cut.xlsx";
+            is = new FileInputStream(".\\out-sum\\" + file + "Sum.xlsx");
+            System.out.println("Reading template \n.\\out-sum\\" + file + "Sum.xlsx\n");
+            wb = new XSSFWorkbook(is);
+        }
+        catch(IOException e){
+            try{
+                path = ".\\out-cut\\" + file + "Cut.xls";
+                is = new FileInputStream(".\\out-sum\\" + file + "Sum.xls");
+                System.out.println("Reading template \n.\\out-sum\\" + file + "Sum.xls\n");
                 wb = new HSSFWorkbook(is);
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook(is);
-            }
-        } catch (IOException e) {
-            System.out.println("\nCannot find .\\out-sum\\" + file + "Sum.xls\n");
-            // print the work file
-            e.printStackTrace();
-            if (".xls".equals(extString)) {
-                wb = new HSSFWorkbook();
-            } else if (".xlsx".equals(extString)) {
-                wb = new XSSFWorkbook();
-            } else {
+            }catch(IOException e2){
+                System.out.println("Fail to read files");
+                e2.printStackTrace();
                 System.out.println("Cannot find .xls or .xlsx");
                 return;
             }
         }
+        // try {
+        //     is = new FileInputStream(".\\out-sum\\" + file + "Sum.xls");
+        //     System.out.println("Reading template \n.\\out-sum\\" + file + "Sum.xls\n");
+        //     if (".xls".equals(extString)) {
+        //         wb = new HSSFWorkbook(is);
+        //     } else if (".xlsx".equals(extString)) {
+        //         wb = new XSSFWorkbook(is);
+        //     }
+        // } catch (IOException e) {
+        //     System.out.println("\nCannot find .\\out-sum\\" + file + "Sum.xls\n");
+        //     // print the work file
+        //     e.printStackTrace();
+        //     if (".xls".equals(extString)) {
+        //         wb = new HSSFWorkbook();
+        //     } else if (".xlsx".equals(extString)) {
+        //         wb = new XSSFWorkbook();
+        //     } else {
+        //         System.out.println("Cannot find .xls or .xlsx");
+        //         return;
+        //     }
+        // }
 
         // Excel
         elem2texture = buildElem2Texture(wb.getSheetAt(0));
-        // System.out.println( elem2texture.get("18M15").y );
         prediction = buildPrediction(wb.getSheetAt(1));
-        // System.out.println( prediction.get(0).y );
         database = buildDatabase(wb.getSheetAt(3));
 
         // create new excel--------------------------------------------------------------------------------------------------
         String[] split = prediction.get(0).x.elem.get(0).x.split("M");
         String[] split2;
         
-        Workbook wb_cut = new HSSFWorkbook();
+        Workbook wb_cut = null;
+        String extString = path.substring(path.lastIndexOf("."));
+        if(extString.equals(".xls")){
+            wb_cut = new HSSFWorkbook();
+        }
+        else{
+            wb_cut = new XSSFWorkbook();
+        }
+        
         setCellStyle(wb_cut);
-        // System.out.println("set");
         Sheet sheet = wb_cut.createSheet(split[0]+"M");
         int label = 1;
         int start = 0;
         int page =0;
-        // first data
-        // System.out.println("plot");
         plotBlock(wb_cut, projectName, start, page);
         fillBlock(wb_cut, prediction.get(0).x, prediction.get(0).y, start, label, page);
         label++;
@@ -174,11 +201,8 @@ public class cut {
             mb = read_mb(row);
             
             if(mb!=null){
-                // System.out.println("r = " + r);
-                // System.out.println("i = " +i);
                 if(compMate(vec.get(i).x, mb)){
                     (vec.get(i).y)++;
-                    // System.out.println("vec.get"+ i +" = " +vec.get(i).y);
                 }
                 else{
                     vec.add(new Pair<Material, Integer>(mb, 1));
@@ -191,9 +215,6 @@ public class cut {
             }
 
         }
-        // for(i=0 ;i<vec.size() ; i++){
-        //     System.out.println("vec.get"+ i +" = " +vec.get(i).y);
-        // }
         return vec;
     }
     static Hashtable<String, Element> buildDatabase(Sheet sheet){
@@ -205,19 +226,14 @@ public class cut {
         int empty = 0;
         String elemStr;
         while (true) {
-            // System.out.println("Forever dom");
             row = sheet.getRow(r);
             if (row != null) {
                 cell = row.getCell(0);
-                // System.out.println(r);
                 try {
                     elemStr = cell.toString();
                 } catch (NullPointerException NPE) {
                     elemStr = null;
                 }
-                // int fr_count = 0;
-                // System.out.println("fr_count start");
-                // System.out.println(cell);
                 if (elemStr != "") {
                     empty = 0;
                     // first time show up
@@ -237,8 +253,6 @@ public class cut {
                         else if(split[0].equals("FR")){
                             Row rowXY[] = {row, sheet.getRow(++r)};
                             eb.fr.add(read_fr(rowXY));
-                            // System.out.println("fr_count = " + fr_count);
-                            // System.out.println("row.getCell(1).toString() = " + row.getCell(1).toString()+ " and read_fr size " + read_fr(rowXY).x.size());
                             frtable.put(row.getCell(1).toString(), read_fr(rowXY));
                         }
                         else{
@@ -324,18 +338,19 @@ public class cut {
     static Material read_mb(Row row){
         Material mb = null;
         if(!row.getCell(1).toString().equals("")){
-            mb = new Material();
-            // System.out.println("row.getCell(0)==null");
-            // if(row.getCell(0)!=null){
-            //     row.getCell(0).setCellType(Cell.CELL_TYPE_STRING);}
-            // mb.spec = row.getCell(0).getStringCellValue();
-            mb.spec = row.getCell(0).getRichStringCellValue().getString();
-            mb.len = (int)row.getCell(1).getNumericCellValue();
+            
+            try{
+                mb = new Material();
+                mb.spec = row.getCell(0).getRichStringCellValue().getString();
+                mb.len = row.getCell(1).getNumericCellValue();
+            }catch(Exception e){
+                System.out.println("請把***Sum.xls的估算資料讀進去(去素材規格按enter)");
+                System.exit(0);;
+            }
+            
             int i = 2;
             while((row.getCell(i)!=null) && !(row.getCell(i).toString().equals(""))){
-                // System.out.println(row.getCell(i).toString());
-                // System.out.println((int)row.getCell(i+1).getNumericCellValue());
-                mb.elem.add(new Pair<String, Integer>(row.getCell(i).toString(), (int)row.getCell(i+1).getNumericCellValue()));
+                mb.elem.add(new Pair<String, Double>(row.getCell(i).toString(), row.getCell(i+1).getNumericCellValue()));
                 i+=2;
             }
         }
@@ -350,7 +365,6 @@ public class cut {
         }
 
         for(int i= 0 ; i<x.elem.size() ;i++){
-            // System.out.println("i = " + i);
             if(!x.elem.get(i).x.equals(y.elem.get(i).x) || !x.elem.get(i).y.equals(y.elem.get(i).y)){
                 return false;
             }
@@ -396,7 +410,6 @@ public class cut {
                 fr.addx(rowXY[0].getCell(1+i).getNumericCellValue());
                 fr.addy(rowXY[1].getCell(1+i).getNumericCellValue());
                 i++;
-                // System.out.println("read_fr i = "+ i);
             }
         }
         else{
@@ -411,7 +424,6 @@ public class cut {
 
         Sheet sheet = wb.getSheetAt(page);
         CellRangeAddress callRangeAddress_header = new CellRangeAddress(hor, hor, ver, ver+1);
-        // CellRangeAddress callRangeAddress_header = new CellRangeAddress(ver, ver+1, hor, hor);
         sheet.addMergedRegion(callRangeAddress_header);
         Row row = sheet.getRow(hor);
         Cell cell = row.getCell(ver);
@@ -451,7 +463,6 @@ public class cut {
             for(int i=0; i<2 ;i++){
                 putText(new Text(str[i], sheet, cellStyle_border, new Pair<Integer, Integer>(ver+i, hor+1)));
             }
-            // System.out.println("frtable.get(" +code + ").x.size() = " + frtable.get(code).x.size());
             for(int i=0;i<frtable.get(code).x.size();i++){
                 putText(new Text(format(frtable.get(code).x.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(ver, hor+2+i)));
                 putText(new Text(format(frtable.get(code).y.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(ver+1, hor+2+i)));
@@ -502,7 +513,6 @@ public class cut {
         sheet.addMergedRegion(callRangeAddress_auditor2);
 
         // fixed words
-        
         row = sheet.getRow(start+14);
         cell = row.getCell(7);
         cell.setCellValue("製表");
@@ -550,7 +560,7 @@ public class cut {
                             {start+3,2}, {start+4,2}, {start+5,2}, {start+6,2}, {start+7,2}, 
                             {start+1,7}, {start+2,7}, {start+12,7}, {start+13,7}, {start+17,7}, 
                             {start+17,9}, {start+18,7}, {start+1,0}, {start+11,7}};
-        HSSFCellStyle []setCellStyles ={cellStyle, cellStyle, cellStyle, cellStyle, cellStyle,
+        CellStyle []setCellStyles ={cellStyle, cellStyle, cellStyle, cellStyle, cellStyle,
                         cellStyle, cellStyle, cellStyle, cellStyle, cellStyle,
                         cellStyle, cellStyle, cellStyle, cellStyle ,cellStyle,
                         cellStyle, cellStyle, cellStyle_red, cellStyle_red};
@@ -600,11 +610,11 @@ public class cut {
         String []split2 = split[0].split("(?<=\\D)(?=\\d)");
         // 編號, 規格, 素材長度, 寬度, 翼板高度, 
         //  模板厚度, 材質, 素材總數
-        String[] str = {String.valueOf(label), material.spec, String.valueOf(material.len), split2[1], split[1], 
+        String[] str = {String.valueOf(label), material.spec, format(material.len+""), split2[1], split[1], 
                     split[2], elem2texture.get(material.elem.get(0).x).y, String.valueOf(count)};
         int [][]points ={{start+2, 1}, {start+2, 7}, {start+3, 3}, {start+4, 3}, {start+5, 3}, 
         {start+6, 3}, {start+7, 3}, {start+11, 9}};
-        HSSFCellStyle []setCellStyles ={cellStyle, cellStyle, cellStyle_red, cellStyle, cellStyle,
+        CellStyle []setCellStyles ={cellStyle, cellStyle, cellStyle_red, cellStyle, cellStyle,
             cellStyle, cellStyle_red, cellStyle_red};
         for(int i=0; i<str.length ;i++){
             putText(new Text(str[i], wb.getSheetAt(page), setCellStyles[i], new Pair<Integer, Integer>(points[i][1], points[i][0])));
@@ -612,28 +622,28 @@ public class cut {
         
         //右上表格
         String spec;
-        int len =0;
+        double len =0;
         int translation = 0;
         Vector<String> types = new Vector<String>();
-        count =0;
-        // System.out.println("material.elem.size() = " + material.elem.size());
+        count = 0;
+        // 10mm = redundant, 3mm = blade width;
+        double checkcnt = 10 + 3;
         for(int i=0 ;i<material.elem.size() ;i++){
             len = material.elem.get(i).y;
             spec = material.elem.get(i).x;
             count++;
             if((i+1 == material.elem.size()) || !spec.equals(material.elem.get(i+1).x)){
-                // System.out.println("material.elem.size() = " + material.elem.size());
-                putText(new Text(String.valueOf(len), wb.getSheetAt(page), cellStyle_border, new Pair<Integer, Integer>(9, 4+translation+start)));
+                putText(new Text(format(len + ""), wb.getSheetAt(page), cellStyle_border, new Pair<Integer, Integer>(9, 4+translation+start)));
                 putText(new Text(spec, wb.getSheetAt(page), cellStyle_border, new Pair<Integer, Integer>(10, 4+translation+start)));
                 putText(new Text(String.valueOf(count), wb.getSheetAt(page), cellStyle_red_border, new Pair<Integer, Integer>(11, 4+translation+start)));
                 types.add(spec);
                 translation++;
+                checkcnt += count*len + count*3 ;
                 count = 0;
             }
         }
-        // for(int j=0;j<types.size();j++)
-        //     System.out.println("type = "+ types.get(j));
-        //     System.out.println(" ");
+
+        putText(new Text(format(checkcnt+""), wb.getSheetAt(page), cellStyle, new Pair<Integer, Integer>(9, 12+start)));
 
         //右下
         Set<String> wSet = new HashSet<String>();
@@ -641,23 +651,22 @@ public class cut {
         Set<String> frSet = new HashSet<String>();
 
         for(int i=0 ; i<types.size();i++){
-            if(!database.get(types.get(i)).w.isEmpty()){
+            if(database.get(types.get(i)) != null && !database.get(types.get(i)).w.isEmpty()){
                 ArrayList<W> wArr = database.get(types.get(i)).w;
                 for(int j=0;j<wArr.size();j++){
                     String wStr = wArr.get(j).code;
                     wSet.add(wStr);
-                    // System.out.println("add = " + wStr);
                 }
             }
 
-            if(database.get(types.get(i)).wr.size()>0){
+            if(database.get(types.get(i)) != null && database.get(types.get(i)).wr.size()>0){
                 ArrayList<WR> wrArr = database.get(types.get(i)).wr;
                 for(int j=0;j<wrArr.size();j++){
                     String wrStr = wrArr.get(j).code;
                     wrSet.add(wrStr);
                 }
             }
-            if(database.get(types.get(i)).fr.size()>0){
+            if(database.get(types.get(i)) != null && database.get(types.get(i)).fr.size()>0){
                 ArrayList<FR> frArr = database.get(types.get(i)).fr;
                 for(int j=0;j<frArr.size();j++){
                     String frStr = frArr.get(j).code;
@@ -665,7 +674,7 @@ public class cut {
                 }
             }
         }
-        // System.out.println(" ");
+
         // Creating an iterator 
         Iterator []value = {wSet.iterator(), wrSet.iterator(), frSet.iterator()}; 
   
@@ -677,9 +686,7 @@ public class cut {
         int height = 0;
         for(int i=0;i<3;i++){
             while (value[i].hasNext() ) { 
-                // System.out.println("i = "+i);
                 String code = value[i].next().toString();
-                // System.out.println("code  = " + code);
                 if(row_l <= row_r){
                     height = fillCode(wb, code, row_l, col_l, page);
                     row_l += height;
@@ -690,17 +697,15 @@ public class cut {
                 }
             } 
         }
-        // if(value[0].hasNext())
-        //     height = fillCode(wb, (String)value[0].next(), row_l, col_l, page);
-        //             row_l += height;
     }
     static void setCellStyle(Workbook wb){
-        cellStyle = (HSSFCellStyle)wb.createCellStyle();
-        cellStyle_red = (HSSFCellStyle)wb.createCellStyle();
-        cellStyle_blue_border = (HSSFCellStyle)wb.createCellStyle();
-        cellStyle_border = (HSSFCellStyle)wb.createCellStyle();
-        cellStyle_red_border = (HSSFCellStyle)wb.createCellStyle();
 
+        cellStyle = wb.createCellStyle();
+        cellStyle_red = wb.createCellStyle();
+        cellStyle_blue_border = wb.createCellStyle();
+        cellStyle_border = wb.createCellStyle();
+        cellStyle_red_border = wb.createCellStyle();
+        
         // font size
         Font font = wb.createFont();
         Font font_red = wb.createFont();
@@ -751,15 +756,15 @@ public class cut {
 class Text{
     String text;
     Sheet sheet;
-    HSSFCellStyle cellStyle;
+    CellStyle cellStyle;
     Pair<Integer, Integer> point;
-    public Text(String text, Sheet sheet, HSSFCellStyle cellStyle, Pair<Integer, Integer> point){
+    public Text(String text, Sheet sheet, CellStyle cellStyle, Pair<Integer, Integer> point){
         this.text = text;
         this.sheet = sheet;
         this.cellStyle = cellStyle;
         this.point = point;
     }
-    public void set(String text, Sheet sheet, HSSFCellStyle cellStyle, Pair<Integer, Integer> point){
+    public void set(String text, Sheet sheet, CellStyle cellStyle, Pair<Integer, Integer> point){
         this.text = text;
         this.sheet = sheet;
         this.cellStyle = cellStyle;
@@ -769,10 +774,10 @@ class Text{
 }
 class Material{
     String spec;
-    int len;
-    Vector<Pair<String, Integer>> elem;
+    double len;
+    Vector<Pair<String, Double>> elem;
     public Material(){
-        elem = new Vector<Pair<String, Integer>>();
+        elem = new Vector<Pair<String, Double>>();
     }
 }
 class Element{
