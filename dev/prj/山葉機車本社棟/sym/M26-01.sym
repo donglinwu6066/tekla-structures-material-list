@@ -1,0 +1,23 @@
+# 
+# Plate Nesting V9 
+# Sym File Name = M26-01.sym
+# Layout from NESTPRO.EXE
+# 
+#      Process            Time Taken 
+# 
+#      Input    :      0 min  0.00 sec 
+#      Pair I   :      0 min  0.01 sec 
+#      Pair II  :      0 min  0.00 sec 
+#      Packing  :      0 min  0.01 sec 
+#      Total    :      0 min  0.02 sec 
+# 
+JOB = M26-01
+No of Distinct Shapes = 2
+Total No of Shapes = 3
+Total No of Stock Sheet = 1 0
+Encl Rect = (0.000000 0.000000) (10891.200000 300.000000)
+Stock Sheet = (310.000000 12030.000000) x 1
+Sum of Area of Shapes = 3265560.000000
+(26M1-_12 2562.600000 150.000000 0.000000 2 0 1)
+(26M2-_15 6568.200000 150.000000 0.000000 3 0 1)
+(26M2-_15 9451.200000 150.000000 0.000000 3 0 1)
