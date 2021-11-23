@@ -48,6 +48,9 @@ public class Excelio {
     static Hashtable<String, UBeam> comp2mater;
     static LinkedHashMap<BCOrd, Integer> UBCrec;
     static Hashtable<String, String> comp2connCode;
+    static Hashtable<String, W> wtable = new Hashtable<String, W>();
+    static Hashtable<String, WR> wrtable = new Hashtable<String, WR>();
+    static Hashtable<String, FR> frtable = new Hashtable<String, FR>();
     
 //    static Hashtable<comp, UBeam> connCode2connMdl;
 //	static Vector<Pair<Material, Integer>> prediction;
@@ -66,15 +69,16 @@ public class Excelio {
 	public void setTriaxial(Workbook wb) {
 		comp2mater = getComp2mater(wb, 0);
 		UBCrec = getUBCrecoder(wb, 1);
+		buildconnCode2drill(wb, 2);
 		comp2connCode = getComp2connCode(wb, 3);
-		Sheet sheet = wb.createSheet("centerdold");
+		Sheet sheet = null;
 		
 		
 		Iterator<BCOrd> itr = UBCrec.keySet().iterator();
 		String lastTag = "";
 		int page = 0;
 		int idx = 0;
-		
+//		System.out.println(UBCrec);
 		while(itr.hasNext()) {
 			BCOrd bcord = itr.next();
 			int cnt = UBCrec.get(bcord);
@@ -85,8 +89,8 @@ public class Excelio {
 				idx = 0;
 			}
 			
-			plotTable(sheet, idx*sheetlen);
-			fillTable(sheet, idx*sheetlen, bcord, cnt);
+			plotTable(sheet, idx);
+			fillTable(sheet, idx, bcord, cnt);
 			idx ++;
 		}
 		
@@ -124,7 +128,95 @@ public class Excelio {
         }
         return hashtable;
     }
-	
+	public void buildconnCode2drill(Workbook wb, int page) {
+		Sheet sheet = wb.getSheetAt(page);
+        Row row = null;
+        Cell cell = null;
+        String connCodeStr = "";
+        int r = 1;
+        while(true) {
+        	row = sheet.getRow(r);
+        	if (row == null) {break;}
+        	cell = row.getCell(0);
+        	
+        	try {
+        		connCodeStr = cell.toString();
+            } catch (NullPointerException NPE) {
+            	
+            	break;
+//            	connCodeStr = null;
+            }
+
+        	String[] split = row.getCell(0).toString().split("-");
+        	System.out.println(split);
+        	if(split[0].equals("W")){
+                wtable.put(row.getCell(0).toString(), read_w(row));
+                System.out.println("put " + row.getCell(1).toString());
+            }
+            else if(split[0].equals("WR")){
+                Row rowXZ[] = {row, sheet.getRow(++r)};
+                wrtable.put(row.getCell(0).toString(), read_wr(rowXZ));
+            }
+            else if(split[0].equals("FR")){
+                Row rowXY[] = {row, sheet.getRow(++r)};
+                frtable.put(row.getCell(0).toString(), read_fr(rowXY));
+            }
+            else{
+                System.out.println("\ndatabase error!!!!\n");
+                System.exit(0);
+            }
+        	
+        	r++;
+        	
+        }
+	}
+    W read_w(Row row){
+        W w = new W();
+        ArrayList<Double> vec = new ArrayList<Double>();
+        for(int i= 1 ;i<=5 ;i++){
+            vec.add(row.getCell(i).getNumericCellValue());
+        }
+        w.code = row.getCell(0).toString();
+        w.set(vec);
+        return w;
+    }
+    WR read_wr(Row rowXZ[]){
+        ArrayList<Double> vec = new ArrayList<Double>();
+        WR wr = new WR();
+        int i = 2;
+        if(rowXZ[0].getCell(1).toString().equals("X") && rowXZ[1].getCell(1).toString().equals("Z")){
+            wr.code = rowXZ[0].getCell(0).toString();
+            while(rowXZ[0].getCell(i) != null && rowXZ[1].getCell(i) != null && !rowXZ[0].getCell(i).toString().equals("")){
+                wr.addx(rowXZ[0].getCell(i).getNumericCellValue());
+                wr.addz(rowXZ[1].getCell(i).getNumericCellValue());
+                i++;
+            }
+        }
+        else{
+            System.out.println("Wrong WR database");
+            System.exit(0);
+        }
+
+        return wr;
+    }
+    FR read_fr(Row rowXY[]){
+        ArrayList<Double> vec = new ArrayList<Double>();
+        int i = 2;
+        FR fr = new FR();
+        if(rowXY[0].getCell(1).toString().equals("X") && rowXY[1].getCell(1).toString().equals("Y")){
+            fr.code = rowXY[0].getCell(0).toString();
+            while(rowXY[0].getCell(i) != null && rowXY[1].getCell(i) != null&& !rowXY[0].getCell(i).toString().equals("")){
+                fr.addx(rowXY[0].getCell(i).getNumericCellValue());
+                fr.addy(rowXY[1].getCell(i).getNumericCellValue());
+                i++;
+            }
+        }
+        else{
+            System.out.println("Wrong FR database");
+            System.exit(0);
+        }
+        return fr;
+    }
 	public LinkedHashMap<BCOrd, Integer> getUBCrecoder(Workbook wb, int page){
 		Sheet sheet = wb.getSheetAt(page);
 		LinkedHashMap<BCOrd, Integer> hashmap = new LinkedHashMap<BCOrd, Integer>();
@@ -133,7 +225,7 @@ public class Excelio {
 //		compTypes = 0;
 //		String compTypeStr = "";
 		int maxrow = cntmaxrow(wb, 1, 1);
-		System.out.println("maxrow for getUBCrecoder " + maxrow);
+//		System.out.println("maxrow for getUBCrecoder " + maxrow);
 		
 		
 		for(int i = 1 ; i<maxrow ; i++) {
@@ -141,7 +233,7 @@ public class Excelio {
 			Integer cnt = hashmap.get(bcord);
 			if(cnt == null) {
 				hashmap.put(bcord, 1);
-				System.out.println("bcord " + bcord);
+//				System.out.println("bcord " + bcord);
 //				String []split = sheet.getRow(i).getCell(2).toString().split("M");
 //				if(!split[0].equals(compTypeStr)) {
 //					compTypeStr = split[0];
@@ -149,7 +241,9 @@ public class Excelio {
 //				}
 			}
 			else {
+				
 				hashmap.put(bcord, ++cnt);
+//				System.out.println("else bcord " + bcord + " and " + cnt);
 			}
 		}
 		
@@ -159,7 +253,7 @@ public class Excelio {
 		Sheet sheet = wb.getSheetAt(page);
 		Hashtable<String, String> hashtable = new Hashtable<String, String>();
 		int maxrow = cntmaxrow(wb, page, 0);
-		System.out.println("maxrow for getComp2connCode " + maxrow);
+//		System.out.println("maxrow for getComp2connCode " + maxrow);
 		Row row = null;
 		Cell cell =null;
 		String str = "";
@@ -185,7 +279,7 @@ public class Excelio {
 				c++;
 			}
 			hashtable.put(compStr, connCodeStr);
-			System.out.println(compStr + ": " + connCodeStr);
+//			System.out.println(compStr + ": " + connCodeStr);
 		}
 		return hashtable;
 	}
@@ -212,7 +306,8 @@ public class Excelio {
 		return bcord;
 	}
 	
-	public void plotTable(Sheet sheet, int start) {
+	public void plotTable(Sheet sheet, int idx) {
+		int start = idx*sheetlen;
         Row row = null;
         Cell cell = null;
         
@@ -277,7 +372,8 @@ public class Excelio {
         tabulate(sheet, number, start+3, 6, 7, 5);
         
 	}
-	public void fillTable(Sheet sheet, int start, BCOrd bcord, int cnt) {
+	public void fillTable(Sheet sheet, int idx, BCOrd bcord, int cnt) {
+		int start = idx*sheetlen;
 		String spec = bcord.comps.get(0).getFirst();
 		
 		String []split = comp2mater.get(spec).spec.split("[*]");
@@ -285,7 +381,7 @@ public class Excelio {
 
         // 編號, 規格, 素材長度, 寬度, 翼板高度, 
         //  模板厚度, 材質, 素材總數
-        String[] str = {String.valueOf(cnt), spec, format(comp2mater.get(spec).len+""), split2[1], split[1], 
+        String[] str = {String.valueOf(idx+1), spec, String.valueOf(bcord.len), split2[1], split[1], 
                     split[2], comp2mater.get(spec).mater, Integer.toString(cnt)};
         int [][]points ={{start+2, 1}, {start+2, 7}, {start+3, 3}, {start+4, 3}, {start+5, 3}, 
         {start+6, 3}, {start+7, 3}, {start+11, 9}};
@@ -296,10 +392,75 @@ public class Excelio {
             (new Text(str[i], sheet, setCellStyles[i], new Pair<Integer, Integer>(points[i][0], points[i][1]))).put();;
         }
 		
+        String len = "";
+        String comp = "";
+        String compCnt = "";
+        double checkcnt = 10 + 3;
+		//upper right
+        for(int i=0 ; i<bcord.comps.size(); i++) {
+        	comp = bcord.comps.get(i).getFirst();
+        	len = format(String.valueOf(comp2mater.get(comp).len));
+        	compCnt = String.valueOf(bcord.comps.get(i).getSecond());
+        	
+        	(new Text(len, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 9))).put();
+        	(new Text(comp, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 10))).put();
+        	(new Text(compCnt, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 11))).put();
+        	
+        	// checkcnt += count*len + count*3 ;
+        	checkcnt += bcord.comps.get(i).getSecond()*(comp2mater.get(comp).len + 3);
+        }
 		
-		
-		
-
+        (new Text(format(checkcnt+""), sheet, cellStyle, new Pair<Integer, Integer>(start+12, 9))).put();
+        //lower right
+        Set<String> wSet = new HashSet<String>();
+        Set<String> wrSet = new HashSet<String>();
+        Set<String> frSet = new HashSet<String>();
+        
+        
+        for(int i=0 ; i<bcord.comps.size();i++){
+        	comp = bcord.comps.get(i).getFirst();
+        	String code = comp2connCode.get(comp);
+        	String[] split3 = code.split(" ");
+        	for(int j = 0 ; j<split3.length ; j++) {
+        		String[] split4 = split3[j].split("-");
+            	
+        		if(split3[j] == null || split3[j].equals(""))
+        			continue;
+//        		System.out.println(comp +" split3 is "+split3[j]);
+	        	if(split4[0].equals("W")) {
+	        		wSet.add(split3[j]);
+	        	}
+	        	else if(split4[0].equals("WR")) {
+	        		wrSet.add(split3[j]);
+	        	}
+	        	else if(split4[0].equals("FR")) {
+	        		frSet.add(split3[j]);
+	        	}
+        	}
+        }
+        
+        // Creating an iterator 
+        Iterator []value = {wSet.iterator(), wrSet.iterator(), frSet.iterator()}; 
+  
+        // Displaying the values after iterating through the iterator 
+        int row_r = start+19;
+        int col_r = 9;
+        int row_l = start+19;
+        int col_l = 7;
+        int height = 0;
+        for(int i=0;i<3;i++){
+            while (value[i].hasNext() ) { 
+                String code = value[i].next().toString();
+                if(row_l <= row_r){
+                    height = fillCode(sheet, code, row_l, col_l);
+                    row_l += height;
+                }
+                else{
+                    height = fillCode(sheet, code, row_r, col_r);
+                    row_r += height;
+                }
+            } 
+        }
 	}
 	public void tabulate(Sheet sheet, String[] items, int startrow, int height, int startcol, int width) {
 		Row row = null;
@@ -320,6 +481,62 @@ public class Excelio {
             }
         }
 	}
+    static int fillCode(Sheet sheet, String code, int hor, int ver){
+        int height = 6;
+
+        CellRangeAddress callRangeAddress_header = new CellRangeAddress(hor, hor, ver, ver+1);
+        sheet.addMergedRegion(callRangeAddress_header);
+        Row row = sheet.getRow(hor);
+        Cell cell = row.getCell(ver);
+        cell.setCellValue(code);
+        
+        RegionUtil.setBorderBottom(BorderStyle.THIN, callRangeAddress_header, sheet); // 下邊框
+        RegionUtil.setBorderLeft(BorderStyle.THIN, callRangeAddress_header, sheet); // 左邊框
+        RegionUtil.setBorderRight(BorderStyle.THIN, callRangeAddress_header, sheet); // 有邊框
+        RegionUtil.setBorderTop(BorderStyle.THIN, callRangeAddress_header, sheet); // 上邊框
+
+        String[] split = code.split("-");
+        if(split[0].equals("W")){
+            cell.setCellStyle(cellStyle_red_border);
+            String[] str = {"XP", "XN", "ZP", "ZN", "OS"};
+//            System.out.println(code);
+            Double[] strCode = {wtable.get(code).drill.get(0), wtable.get(code).drill.get(1), wtable.get(code).drill.get(2), wtable.get(code).drill.get(3), wtable.get(code).drill.get(4)};
+            for(int i=0; i<5 ;i++){
+                (new Text(str[i], sheet, cellStyle_border, new Pair<Integer, Integer>(hor+1+i, ver))).put();
+                (new Text(format(strCode[i]+""), sheet, cellStyle_border, new Pair<Integer, Integer>(hor+1+i, ver+1))).put();
+                
+            }
+            height =6;
+        }else if(split[0].equals("WR")){
+            cell.setCellStyle(cellStyle_red_border);
+            String[] str = {"X", "Z"};
+            for(int i=0; i<2 ;i++){
+                (new Text(str[i], sheet, cellStyle_border, new Pair<Integer, Integer>(hor+1, ver+i))).put();
+            }
+
+            for(int i=0;i<wrtable.get(code).x.size();i++){
+                (new Text(format(wrtable.get(code).x.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(hor+2+i, ver))).put();
+                (new Text(format(wrtable.get(code).z.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(hor+2+i, ver+1))).put();
+            }
+
+            height = wrtable.get(code).x.size()+2;
+        }else if(split[0].equals("FR")){
+            cell.setCellStyle(cellStyle_blue_border);
+            String[] str = {"X", "Y"};
+            for(int i=0; i<2 ;i++){
+                (new Text(str[i], sheet, cellStyle_border, new Pair<Integer, Integer>(hor+1, ver+i))).put();
+            }
+            for(int i=0;i<frtable.get(code).x.size();i++){
+                (new Text(format(frtable.get(code).x.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(hor+2+i, ver))).put();
+                (new Text(format(frtable.get(code).y.get(i)+""), sheet, cellStyle_border, new Pair<Integer, Integer>(hor+2+i, ver+1))).put();
+            }
+
+            height = frtable.get(code).x.size()+2;
+        }
+
+        return height;
+
+    }
 	public void plotTriaxial() {
 		
 	}
@@ -589,7 +806,7 @@ public class Excelio {
             }
         }
 	}
-    String format(String val){
+    static String format(String val){
         String stringVal = String.valueOf(val);
         String[] number = stringVal.split( "[.]" );
         if(number.length>1 && number[1].equalsIgnoreCase("0")){

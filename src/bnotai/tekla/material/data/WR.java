@@ -4,18 +4,18 @@ import java.util.*;
 
 
 public class WR {
-    String comp = "";
-    ArrayList<Double> model;
-    double xp;
-    double xn; 
-    double zp;
-    double zn;
-    double os;
+    public String code = "";
+    public ArrayList<Double> x = null;
+    public ArrayList<Double> z = null;
     public WR(){
-    	comp = "";
-    	model = new ArrayList<Double>(5);
+    	code = "";
+        this.x = new ArrayList<Double>();
+        this.z = new ArrayList<Double>();
     }
-    public void add(ArrayList<Double> model){
-    	this.model = model;
+    public void addx(double x){
+        this.x.add(x);
+    }
+    public void addz(double z){
+        this.z.add(z);
     }
 }

@@ -54,12 +54,23 @@ import org.apache.commons.io.FilenameUtils;
 public class cut {
 	static Txtio txtio = new Txtio();
 	static Excelio excelio = new Excelio();
-
+	static Crypto crypto = null;
+	
     static Hashtable<String, W> wtable = new Hashtable<String, W>();
     static Hashtable<String, WR> wrtable = new Hashtable<String, WR>();
     static Hashtable<String, FR> frtable = new Hashtable<String, FR>();
 
-    public static void main(String argv[]) {
+    public static void main(String argv[]) throws Exception{
+    	// lock
+    	Pair<String, String> access = txtio.readDES("data.dat");
+    	
+		Crypto crypto = new Crypto();
+		String hostname = crypto.gethostname();
+		String MachineID = crypto.getMachineID();
+    	if((boolean)(!hostname.equals(crypto.decrypt(access.getFirst()))) && (boolean)(!MachineID.equals(crypto.decrypt(access.getSecond())))){
+    		System.exit(0);
+    	}
+    	
     	// program description
     	System.out.println("This program read material list and generate report\n");
     	
@@ -78,12 +89,14 @@ public class cut {
     	System.out.println("\nExcel template is " + prjdir + prjname + extStr);
     	Workbook tplwb = excelio.getWb(prjdir + prjname + loadtag  + extStr);
     	excelio.setCellStyle(tplwb);
-    	excelio.setCorp("勃 泰 有 限 公 司", prjname);
+    	// modify company name
+    	excelio.setCorp("X X 有 限 公 司", prjname);
     	excelio.plotTriaxial();
     	
-    	Hashtable<String, Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>>> 
+    	Hashtable<String, Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>> 
     		rawncl = txtio.readncl(prjdir+"\\ncl\\", listOfFiles);
-
+    	Interpreter interpreter = new Interpreter(rawncl);
+    	
 //    	for(File f : listOfFiles) {
 //    		try {
 //    			System.out.println(f.getName() +" lw first element: "+rawncl.get(FilenameUtils.removeExtension(f.getName())));

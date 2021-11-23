@@ -14,9 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
+import java.io.*;
 
 public class Txtio{
 	public Txtio() {
@@ -54,15 +57,15 @@ public class Txtio{
 
         return filename;
 	}
-	public Hashtable<String, Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>>> 
+	public Hashtable<String, Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>> 
 		readncl(String path, File[] fileList) {
-		Hashtable<String, Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>>> rawncl = 
-				new Hashtable<String, Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>>>();
+		Hashtable<String, Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>> rawncl = 
+				new Hashtable<String, Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>>();
 		
         for(File f : fileList) {
 //            System.out.println(f.getName());
         	System.out.println(f.getName());
-            Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>> compdata
+            Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>> compdata
             	= readcompdata(path + f.getName());
             rawncl.put(FilenameUtils.removeExtension(f.getName()), compdata);
             System.out.println("");
@@ -71,10 +74,10 @@ public class Txtio{
 		return rawncl;
 	}
 	
-	public Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>> readcompdata(String filename){
-		List<Pair<Double, Double>> lw = new ArrayList<Pair<Double, Double>>();
-		List<Pair<Double, Double>> abs = new ArrayList<Pair<Double, Double>>();
-		List<Pair<Double, Double>> rw = new ArrayList<Pair<Double, Double>>();
+	public Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>> readcompdata(String filename){
+		List<Triple<Double, Double, Double>> lw = new ArrayList<Triple<Double, Double, Double>>();
+		List<Triple<Double, Double, Double>> abs = new ArrayList<Triple<Double, Double, Double>>();
+		List<Triple<Double, Double, Double>> rw = new ArrayList<Triple<Double, Double, Double>>();
 		boolean flag = false;
 		try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
 		    String line;
@@ -100,8 +103,8 @@ public class Txtio{
 //		    		}
 		    		
 		    		split[1] = split[1].substring(0, split[1].length() - 1);
-		    		Pair<Double, Double> data = new Pair<Double, Double>(Double.parseDouble(split[1]), Double.parseDouble(split[2]));
-		    		System.out.println("tag is " +split[0] + ", data is: " + data.getFirst()+ " and "+ data.getSecond());
+		    		Triple<Double, Double, Double> data = new Triple<Double, Double, Double>(Double.parseDouble(split[1]), Double.parseDouble(split[2]), Double.parseDouble(split[3]));
+		    		System.out.println("tag is " +split[0] + ", data is: " + data.getFirst()+ " and "+ data.getSecond()+ " and "+data.getThird());
 		    		// lw
 		    		if(split[0].equals("o")) {
 		    			lw.add(data);
@@ -122,7 +125,7 @@ public class Txtio{
 		} catch (IOException e) {
             System.err.format("IOException: %s%n", e);
         }
-		return new Triple<List<Pair<Double, Double>>, List<Pair<Double, Double>>, List<Pair<Double, Double>>>(lw, abs, rw);
+		return new Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>(lw, abs, rw);
 	}
 	/**
 	 * @param {String} fileList a List<String> get from readtxt(String path)
@@ -207,5 +210,31 @@ public class Txtio{
         for(File f : files) {
             System.out.println(f.getName());
         }
+    }
+    
+    public Pair<String, String>  readDES(String filename) throws Exception {
+    	InputStream is = new FileInputStream(filename);
+        BufferedReader din = new BufferedReader(new InputStreamReader(is));
+        // count the available bytes form the input stream
+        int count = is.available();
+        // create buffer
+        byte[] bs = new byte[count];
+        
+    	String hostname = "";
+    	String uuid = "";
+        
+        try {
+//            File myObj = new File("data.bin");
+//            Scanner myReader = new Scanner(myObj);
+            hostname = din.readLine().trim();
+            uuid = din.readLine().trim();
+          } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+          }
+        System.out.println(hostname);
+        System.out.println(uuid);
+        return new Pair<String, String>(hostname, uuid);
+    	
     }
 }

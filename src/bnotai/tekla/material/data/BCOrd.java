@@ -35,6 +35,9 @@ public class BCOrd {
 	public int size() {
 		return comps.size();
 	}
+    public String toString() {
+        return "Len: " + len + ", Value: " + comps;
+    }
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BCOrd) {
@@ -53,8 +56,15 @@ public class BCOrd {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((comps == null) ? 0 : comps.hashCode());
+        int result = 0;
+        for(int i = 0 ; i<this.comps.size() ; i++) {
+//        	System.out.println(this.comps.get(i).getSecond() + " hashcode is " + this.comps.get(i).getSecond().hashCode() );
+        	result += this.comps.get(i).getFirst().hashCode() + this.comps.get(i).getSecond().hashCode()* prime;
+		}
+//        System.out.println("result: " + result);
+//        result = result * prime;
+//        result = prime * result + ((comps == null) ? 0 : comps.hashCode());
+//        result = comps.hashCode();
         return result;
     } 
 }

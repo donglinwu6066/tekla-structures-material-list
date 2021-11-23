@@ -6,6 +6,7 @@
 import bnotai.tekla.material.data.*;
 import bnotai.tekla.material.fileio.*;
 import java.lang.*;
+import java.net.InetAddress;
 import java.util.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,8 +38,18 @@ import org.apache.poi.ss.util.CellRangeAddress;
 public class auto {
 	static Txtio txtio = new Txtio();
 	static Excelio excelio = new Excelio();
-	
+	static Crypto crypto = null;
     public static void main(String argv[]) throws Exception{
+    	// lock
+    	Pair<String, String> access = txtio.readDES("data.dat");
+    	
+		Crypto crypto = new Crypto();
+		String hostname = crypto.gethostname();
+		String MachineID = crypto.getMachineID();
+    	if((boolean)(!hostname.equals(crypto.decrypt(access.getFirst()))) && (boolean)(!MachineID.equals(crypto.decrypt(access.getSecond())))){
+    		System.exit(0);
+    	}
+    	
     	// program description
     	System.out.println("This program read .sym from tekla to excel\n");
     	

@@ -3,18 +3,15 @@ package bnotai.tekla.material.data;
 import java.util.*;
 
 public class W {
-    String comp;
-    ArrayList<Double> x = null;
-    ArrayList<Double> z = null;
+	public String code;
+    //xp, xn, zp, zn, os
+	public ArrayList<Double> drill = null;
     public W(){
-    	comp = "";
-        this.x = new ArrayList<Double>();
-        this.z = new ArrayList<Double>();
+    	code = "";
+        this.drill = new ArrayList<Double>();
     }
-    public void addx(double x){
-        this.x.add(x);
+    public void set(ArrayList<Double> arr){
+        this.drill = arr;
     }
-    public void addz(double z){
-        this.z.add(z);
-    }
+
 }

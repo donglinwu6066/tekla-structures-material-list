@@ -35,8 +35,19 @@ import org.apache.poi.ss.util.CellRangeAddress;
 public class sum {
 	static Txtio txtio = new Txtio();
 	static Excelio excelio = new Excelio();
+	static Crypto crypto = null;
 	
     public static void main(String argv[]) throws Exception{
+    	// lock
+    	Pair<String, String> access = txtio.readDES("data.dat");
+    	
+		Crypto crypto = new Crypto();
+		String hostname = crypto.gethostname();
+		String MachineID = crypto.getMachineID();
+    	if((boolean)(!hostname.equals(crypto.decrypt(access.getFirst()))) && (boolean)(!MachineID.equals(crypto.decrypt(access.getSecond())))){
+    		System.exit(0);
+    	}
+    	
     	// program description
     	System.out.println("This program accmulate all material types used from tekla\n");
     	
@@ -45,9 +56,16 @@ public class sum {
     	String loadtag = "Auto";
     	String tag = "Sum";
     	System.out.println("Reading project: " + prjname);
-
+    	File[] listOfFiles = txtio.getfilesname(".\\prj\\"+prjname+"\\ncl\\", "*.ncl");
+    	
     	// set read data folder
     	String prjdir = ".\\prj\\"+prjname+"\\";
+    	
+    	// read ncl
+    	Hashtable<String, Triple<List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>, List<Triple<Double, Double, Double>>>> 
+		rawncl = txtio.readncl(prjdir+"\\ncl\\", listOfFiles);
+    	Interpreter interpreter = new Interpreter(rawncl);
+    	interpreter.genConnCode();
     	
     	// read input excel template
     	String extStr = excelio.checkWbVer(prjdir);

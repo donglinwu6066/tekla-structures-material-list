@@ -3,11 +3,11 @@ package bnotai.tekla.material.data;
 import java.util.*;
 
 public class FR {
-    String comp;
-    ArrayList<Double> x;
-    ArrayList<Double> y;
+    public String code;
+    public ArrayList<Double> x;
+    public ArrayList<Double> y;
     public FR(){
-    	comp = "";
+    	code = "";
         this.x = new ArrayList<Double>();
         this.y = new ArrayList<Double>();
     }
