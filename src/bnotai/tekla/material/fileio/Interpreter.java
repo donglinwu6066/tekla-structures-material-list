@@ -51,7 +51,7 @@ public class Interpreter {
         }
         Collections.sort(lwArr, FRdrill.Comparators.ASC);
         Collections.sort(rwArr, FRdrill.Comparators.ASC);
-        System.out.println("lwArr \n" + lwArr);
+        // System.out.println("lwArr \n" + lwArr);
 	}
 	public void readPlatesR(List<FRdrill> arr, List<Triple<Double, Double, Double>> plate, int idx){
 		if(plate.get(idx).getFirst()-plate.get(idx+1).getFirst()<0.001) {
