@@ -143,6 +143,7 @@ public class Txtio{
 
             try (BufferedReader br = Files
                     .newBufferedReader(Paths.get(path + fileList[filecnt].getName()))) {
+            	System.out.println("processing "+ Paths.get(path + fileList[filecnt].getName()));
                 // read line by line
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -159,6 +160,7 @@ public class Txtio{
                 System.err.format("IOException: %s%n", e);
             }
             filecnt++;
+            
         }
 		
 		return (new Pair<List<String>, List<Integer>>(dataList, dupeList));
@@ -232,8 +234,8 @@ public class Txtio{
             System.out.println("An error occurred.");
             e.printStackTrace();
           }
-        System.out.println(hostname);
-        System.out.println(uuid);
+//        System.out.println(hostname);
+//        System.out.println(uuid);
         return new Pair<String, String>(hostname, uuid);
     	
     }

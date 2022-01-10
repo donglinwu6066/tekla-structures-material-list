@@ -65,6 +65,6 @@ public class BCOrd {
 //        result = result * prime;
 //        result = prime * result + ((comps == null) ? 0 : comps.hashCode());
 //        result = comps.hashCode();
-        return result;
+        return (int)result;
     } 
 }

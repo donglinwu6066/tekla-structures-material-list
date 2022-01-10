@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
-  <headerType>gui</headerType>
+  <headerType>console</headerType>
   <jar>C:\Users\dongl\eclipse-workspace\excel premium\build\cut.jar</jar>
-  <outfile>C:\Users\dongl\eclipse-workspace\excel premium\build\cut.exe</outfile>
+  <outfile>C:\Users\dongl\eclipse-workspace\excel premium\dev\cut.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>

@@ -5,6 +5,7 @@
 import bnotai.tekla.material.data.*;
 import bnotai.tekla.material.fileio.*;
 import java.lang.*;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,8 +13,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
+import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -37,7 +39,16 @@ public class sum {
 	static Excelio excelio = new Excelio();
 	static Crypto crypto = null;
 	
-    public static void main(String argv[]) throws Exception{
+    public static void main(String argv[]) throws Exception, IOException, InterruptedException, URISyntaxException{
+    	// create console for user
+    	Console console = System.console();
+        if(console == null && !GraphicsEnvironment.isHeadless()){
+            String filename = auto.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+            Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar \"" + filename + "\""});
+        }else{
+            System.out.println("Program has ended, please type 'exit' to close the console");
+        }
+        
     	// lock
     	Pair<String, String> access = txtio.readDES("data.dat");
     	
@@ -80,6 +91,6 @@ public class sum {
     	// export to new excel
     	excelio.writeWb(tplwb, prjdir + prjname + tag + extStr);
     	System.out.println("done\n");
-    	
+    	System.in.read();
     }
 }

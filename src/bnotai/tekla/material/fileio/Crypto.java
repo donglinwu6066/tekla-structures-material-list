@@ -90,7 +90,6 @@ public class Crypto {
 		for (int i = 0; i < iLen; i = i + 2) {
 			String strTmp = new String(arrB, i, 2);
 			arrOut[i / 2] = (byte) Integer.parseInt(strTmp, 16);
-			System.out.println("arrOut[i / 2] " + arrOut[i / 2]);
 		}
 		return arrOut;
 	}

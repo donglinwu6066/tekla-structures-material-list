@@ -1,0 +1,25 @@
+# 
+# Plate Nesting V9 
+# Sym File Name = 75M-04.sym
+# Layout from NESTPRO.EXE
+# 
+#      Process            Time Taken 
+# 
+#      Input    :      0 min  0.00 sec 
+#      Pair I   :      0 min  0.03 sec 
+#      Pair II  :      0 min  0.00 sec 
+#      Packing  :      0 min  0.03 sec 
+#      Total    :      0 min  0.06 sec 
+# 
+JOB = 75M-04
+No of Distinct Shapes = 4
+Total No of Shapes = 5
+Total No of Stock Sheet = 1 0
+Encl Rect = (0.000000 0.000000) (8011.900000 300.000000)
+Stock Sheet = (310.000000 9000.000000) x 1
+Sum of Area of Shapes = 2398770.000000
+(78M6-_3 872.000000 150.000000 0.000000 4 0 1)
+(78M6-_3 2620.000000 150.000000 0.000000 4 0 1)
+(78M7-_3 4272.900000 150.000000 0.000000 5 0 1)
+(78M5-_3 5793.300000 150.000000 0.000000 3 0 1)
+(78M1-_3 7274.350000 150.000000 0.000000 2 0 1)

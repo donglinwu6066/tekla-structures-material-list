@@ -16,10 +16,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.io.BufferedReader;
+import java.io.Console;
+
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import java.awt.GraphicsEnvironment;
+import java.net.URISyntaxException;
 
 //import org.apache.commons.math3.util.Pair;
 // 2003 = HSSFWorkbook, 2007 = XSSFWorkbook;
@@ -39,7 +44,16 @@ public class auto {
 	static Txtio txtio = new Txtio();
 	static Excelio excelio = new Excelio();
 	static Crypto crypto = null;
-    public static void main(String argv[]) throws Exception{
+    public static void main(String argv[]) throws Exception, IOException, InterruptedException, URISyntaxException{
+    	// create console for user
+    	Console console = System.console();
+        if(console == null && !GraphicsEnvironment.isHeadless()){
+            String filename = auto.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+            Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar \"" + filename + "\""});
+        }else{
+            System.out.println("Program has ended, please type 'exit' to close the console");
+        }
+        
     	// lock
     	Pair<String, String> access = txtio.readDES("data.dat");
     	

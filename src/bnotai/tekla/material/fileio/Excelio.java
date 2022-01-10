@@ -114,7 +114,6 @@ public class Excelio {
                 cellSpec = row.getCell(4);
                 cellMater = row.getCell(5);
                 if(!cellComp.toString().equals("")){
-
                     hashtable.put(cellComp.toString(), new UBeam(cellSpec.toString(), cellMater.toString(), cellLen.getNumericCellValue()));
                 }
                 else{
@@ -368,21 +367,23 @@ public class Excelio {
         // ******************** //
         String steps[] = {"步 驟", "位 置", "左翼板", "腹 板", "右翼板", " "};
         String number[] = {"編 號", "構 件", "長 度", "零 件", "支 數"};
-        tabulate(sheet, steps, start+8, 26, 0, 5);
+        tabulate(sheet, steps, start+8, 26, 0, 6);
         tabulate(sheet, number, start+3, 6, 7, 5);
         
 	}
 	public void fillTable(Sheet sheet, int idx, BCOrd bcord, int cnt) {
 		int start = idx*sheetlen;
-		String spec = bcord.comps.get(0).getFirst();
-		
-		String []split = comp2mater.get(spec).spec.split("[*]");
+		//String spec = bcord.comps.get(0).getFirst();
+		String comp = bcord.comps.get(0).getFirst();
+		String spec = comp2mater.get(comp).spec;
+		System.out.println("spec is = " +spec);
+		String []split = comp2mater.get(comp).spec.split("[*]");
 		String []split2 = split[0].split("(?<=\\D)(?=\\d)");
 
         // 編號, 規格, 素材長度, 寬度, 翼板高度, 
         //  模板厚度, 材質, 素材總數
         String[] str = {String.valueOf(idx+1), spec, String.valueOf(bcord.len), split2[1], split[1], 
-                    split[2], comp2mater.get(spec).mater, Integer.toString(cnt)};
+                    split[2], comp2mater.get(comp).mater, Integer.toString(cnt)};
         int [][]points ={{start+2, 1}, {start+2, 7}, {start+3, 3}, {start+4, 3}, {start+5, 3}, 
         {start+6, 3}, {start+7, 3}, {start+11, 9}};
         CellStyle []setCellStyles ={cellStyle, cellStyle, cellStyle_red, cellStyle, cellStyle,
@@ -393,19 +394,22 @@ public class Excelio {
         }
 		
         String len = "";
-        String comp = "";
         String compCnt = "";
         double checkcnt = 10 + 3;
 		//upper right
         for(int i=0 ; i<bcord.comps.size(); i++) {
         	comp = bcord.comps.get(i).getFirst();
-        	len = format(String.valueOf(comp2mater.get(comp).len));
-        	compCnt = String.valueOf(bcord.comps.get(i).getSecond());
-        	
-        	(new Text(len, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 9))).put();
-        	(new Text(comp, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 10))).put();
-        	(new Text(compCnt, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 11))).put();
-        	
+        	if(comp == null || comp2mater.get(comp) == null) {
+        		continue;
+        	}
+
+	        len = format(String.valueOf(comp2mater.get(comp).len));
+	       	compCnt = String.valueOf(bcord.comps.get(i).getSecond());
+	       	
+	       	(new Text(len, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 9))).put();
+	       	(new Text(comp, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 10))).put();
+	       	(new Text(compCnt, sheet, cellStyle_border, new Pair<Integer, Integer>(start+4+i, 11))).put();
+
         	// checkcnt += count*len + count*3 ;
         	checkcnt += bcord.comps.get(i).getSecond()*(comp2mater.get(comp).len + 3);
         }
@@ -420,6 +424,9 @@ public class Excelio {
         for(int i=0 ; i<bcord.comps.size();i++){
         	comp = bcord.comps.get(i).getFirst();
         	String code = comp2connCode.get(comp);
+        	if(code == null) {
+        		continue;
+        	}
         	String[] split3 = code.split(" ");
         	for(int j = 0 ; j<split3.length ; j++) {
         		String[] split4 = split3[j].split("-");
@@ -627,7 +634,7 @@ public class Excelio {
 	 * @param {Pair<List<String>, List<Integer>>} symdata first value is
 	 */
 	public void cr8symsheet(Workbook wb, int page, Pair<List<String>, List<Integer>> symdata) {
-		
+		System.out.println("creating sheet");
 		Sheet sheet = wb.getSheetAt(page);
 		int cnt = 0;
 		int r = 1, c = 1;
@@ -696,6 +703,7 @@ public class Excelio {
 	 * @param {String} path destination
 	 */
 	public void writeWb(Workbook wb, String path) {
+		System.out.println("writing to sheet");
         try {
             FileOutputStream fos = new FileOutputStream(new File(path));
             wb.write(fos);
